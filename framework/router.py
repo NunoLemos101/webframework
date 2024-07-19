@@ -11,6 +11,29 @@ class Router:
     def __init__(self):
         self.routes = {}
 
+    def __call__(self, environ, start_response):
+
+        request = Request.from_environ(environ)
+
+        self.execute_all_middleware(request)
+
+        response = self.handle_request(request)
+
+        if response:
+
+            self.execute_all_middleware_after(request, response)
+
+            response_content = response.to_http_response()
+
+            start_response(self.status_code_to_message(response.status), list(response.headers.items()))
+
+            return [response_content['body'].encode()]
+
+        else:
+            # If no response was returned by the view function, return a 404 response
+            start_response('404 Not Found', [('Content-Type', 'text/plain')])
+            return [b'404 Not Found']
+
     def get(self, path: str):
         return self.add_route(path, "GET")
 
@@ -62,3 +85,18 @@ class Router:
 
     def execute_all_middleware_after(self, request, response):
         self._middleware_manager.execute_all_after(request, response)
+
+    def status_code_to_message(self, status_code):
+        status_messages = {
+            200: "200 OK",
+            201: "201 Created",
+            202: "202 Accepted",
+            204: "204 No Content",
+            400: "400 Bad Request",
+            401: "401 Unauthorized",
+            403: "403 Forbidden",
+            404: "404 Not Found",
+            500: "500 Internal Server Error",
+        }
+
+        return status_messages.get(status_code, f"{status_code} Unknown Status Code")

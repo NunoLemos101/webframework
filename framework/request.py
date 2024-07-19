@@ -18,3 +18,14 @@ class Request:
             except json.JSONDecodeError:
                 raise ValueError("Invalid JSON")
         return None
+
+    @classmethod
+    def from_environ(cls, environ):
+        # Extract the necessary information from the environ dictionary
+        path = environ['PATH_INFO']
+        method = environ['REQUEST_METHOD']
+        headers = {k: v for k, v in environ.items() if k.startswith('HTTP_')}
+        body = environ['wsgi.input'].read(int(environ.get('CONTENT_LENGTH', 0)))
+
+        # Create and return a Request object
+        return cls(path=path, method=method, headers=headers, body=body)
