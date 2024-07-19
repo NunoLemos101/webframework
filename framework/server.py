@@ -1,8 +1,5 @@
 import importlib
 import inspect
-import signal
-import sys
-from http.server import BaseHTTPRequestHandler, HTTPServer
 
 from gunicorn.app.base import BaseApplication
 
