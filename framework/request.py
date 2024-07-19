@@ -25,6 +25,7 @@ class Request:
         path = environ['PATH_INFO']
         method = environ['REQUEST_METHOD']
         headers = {k: v for k, v in environ.items() if k.startswith('HTTP_')}
+        headers['Content-Type'] = environ.get('CONTENT_TYPE', 'application/json')
         body = environ['wsgi.input'].read(int(environ.get('CONTENT_LENGTH', 0)))
 
         # Create and return a Request object
